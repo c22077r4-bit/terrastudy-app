@@ -108,6 +108,8 @@
 .app-content {
   height: calc(100% - 31px);
   overflow-y: auto;
+  overscroll-behavior-x: contain;
+  touch-action: pan-y;
   scrollbar-width: none;
   padding-bottom: 104px;
 }
@@ -464,8 +466,147 @@
   display: grid;
   place-items: center;
 }
-.battle-blank {
-  padding: 0;
+.battle-screen {
+  background:
+    radial-gradient(circle at 100% 0, rgba(16, 185, 129, 0.09), transparent 33%), var(--canvas);
+}
+.battle-team-mark {
+  width: 39px;
+  height: 39px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  color: var(--emerald-dark);
+  background: #ddf8ed;
+}
+.battle-points-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 27px;
+  padding: 21px;
+  color: white;
+  background: linear-gradient(145deg, #17483e, #087b60);
+  box-shadow: 0 18px 36px rgba(13, 92, 72, 0.2);
+}
+.battle-card-glow {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border: 28px solid rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  right: -72px;
+  top: -92px;
+}
+.battle-points-heading {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #b4ded2;
+  font-size: 11px;
+  font-weight: 700;
+}
+.battle-points-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #ffda70;
+  background: rgba(255, 255, 255, 0.11);
+}
+.battle-total {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 22px 0 24px;
+}
+.battle-total strong {
+  font: 800 42px/1 "Manrope";
+  letter-spacing: -2px;
+}
+.battle-total span {
+  color: #9fd5c7;
+  font-size: 10px;
+  font-weight: 700;
+}
+.battle-breakdown {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  align-items: stretch;
+  gap: 15px;
+  padding: 15px;
+  border-radius: 17px;
+  background: rgba(3, 49, 39, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.battle-breakdown i {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.battle-breakdown div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.battle-breakdown span {
+  color: #a8cdc4;
+  font-size: 8px;
+  line-height: 1.4;
+}
+.battle-breakdown strong {
+  font: 800 18px "Manrope";
+}
+.battle-start-card {
+  width: 100%;
+  min-height: 104px;
+  margin-top: 18px;
+  padding: 17px;
+  border: 1px solid #a5e5cd;
+  border-radius: 23px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  text-align: left;
+  color: var(--ink);
+  background: linear-gradient(135deg, #ffffff, #e8faf3);
+  box-shadow: 0 10px 24px rgba(27, 77, 63, 0.09);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+.battle-start-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 5px 12px rgba(27, 77, 63, 0.08);
+}
+.battle-start-icon {
+  width: 54px;
+  height: 54px;
+  flex: 0 0 auto;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  color: white;
+  background: linear-gradient(145deg, #1ac991, #079b70);
+  box-shadow: 0 8px 16px rgba(16, 185, 129, 0.27);
+}
+.battle-start-copy {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.battle-start-copy small {
+  color: var(--muted);
+  font-size: 9px;
+}
+.battle-start-copy strong {
+  font: 800 17px "Manrope";
+}
+.battle-start-arrow {
+  color: var(--emerald-dark);
 }
 .modal-backdrop {
   position: absolute;
@@ -733,36 +874,42 @@
   font-size: 10px;
   line-height: 1.5;
 }
-.floating-nav {
+.taskbar {
   position: absolute;
   z-index: 30;
-  right: 18px;
-  bottom: 17px;
-  display: flex;
-  gap: 8px;
+  right: 12px;
+  left: 12px;
+  bottom: 10px;
+  height: 68px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
   align-items: center;
-}
-.floating-nav button {
-  height: 48px;
-  border: 1px solid #dde7e4;
-  border-radius: 16px;
+  border: 1px solid rgba(221, 231, 228, 0.95);
+  border-radius: 22px;
   background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 34px rgba(24, 58, 49, 0.17);
+  backdrop-filter: blur(16px);
+}
+.taskbar button {
+  height: 50px;
+  border: 0;
+  border-radius: 15px;
+  background: #eff5f3;
   color: var(--ink);
-  box-shadow: 0 8px 24px rgba(24, 58, 49, 0.17);
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 13px;
-  font-size: 9px;
-  font-weight: 700;
-}
-.floating-nav .home-fab {
-  width: 50px;
-  padding: 0;
   justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.taskbar .taskbar-home {
   color: white;
-  background: var(--emerald);
-  border-color: var(--emerald);
+  background: linear-gradient(145deg, #19c890, #079d70);
+  box-shadow: 0 7px 15px rgba(16, 185, 129, 0.24);
 }
 .detail-screen {
   padding-bottom: 20px;
@@ -1388,6 +1535,33 @@
   outline: 0;
   color: var(--ink);
   font-size: 11px;
+}
+.note-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 4px;
+  border-radius: 14px;
+  background: #e7eeec;
+}
+.note-tabs button {
+  height: 37px;
+  border: 0;
+  border-radius: 10px;
+  color: #7b8a8e;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 700;
+  transition:
+    color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
+}
+.note-tabs button.active {
+  color: var(--emerald-dark);
+  background: white;
+  box-shadow: 0 3px 8px rgba(39, 75, 65, 0.09);
 }
 .topic-row {
   display: flex;

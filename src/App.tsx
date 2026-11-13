@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode, type TouchEvent } from "react";
 
 type Screen = "home" | "explore" | "battle" | "ranking" | "settings";
 type IconName =
@@ -227,22 +227,23 @@ function BottomNav({
   );
 }
 
-function FloatingNav({ onBack, onHome }: { onBack: () => void; onHome: () => void }) {
+function Taskbar({ onBack, onHome }: { onBack: () => void; onHome: () => void }) {
   return (
-    <div className="floating-nav">
+    <nav className="taskbar" aria-label="画面操作">
       <button onClick={onBack} aria-label="戻る">
         <Icon name="arrow-left" />
         <span>戻る</span>
       </button>
-      <button className="home-fab" onClick={onHome} aria-label="ホーム">
+      <button className="taskbar-home" onClick={onHome} aria-label="ホーム">
         <Icon name="home" />
+        <span>ホーム</span>
       </button>
-    </div>
+    </nav>
   );
 }
 
 function HomeScreen() {
-  const [seconds, setSeconds] = useState(2730);
+  const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(false);
   const [modal, setModal] = useState<"log" | "post" | null>(null);
   const [subject, setSubject] = useState("数学");
@@ -418,7 +419,55 @@ function HomeScreen() {
 }
 
 function BattleScreen() {
-  return <div className="screen battle-blank" aria-label="陣地バトル" />;
+  return (
+    <div className="screen battle-screen" aria-label="陣地バトル">
+      <TopBar
+        title="陣地バトル"
+        subtitle="チームの戦況"
+        trailing={
+          <div className="battle-team-mark">
+            <Icon name="swords" size={19} />
+          </div>
+        }
+      />
+      <section className="battle-points-card">
+        <div className="battle-card-glow" />
+        <div className="battle-points-heading">
+          <div className="battle-points-icon">
+            <Icon name="trophy" size={22} />
+          </div>
+          <span>チーム総ポイント</span>
+        </div>
+        <div className="battle-total">
+          <strong>24,860</strong>
+          <span>ポイント</span>
+        </div>
+        <div className="battle-breakdown">
+          <div>
+            <span>購入した建物の合計ポイント</span>
+            <strong>18,420</strong>
+          </div>
+          <i />
+          <div>
+            <span>保有しているポイント</span>
+            <strong>6,440</strong>
+          </div>
+        </div>
+      </section>
+      <button className="battle-start-card">
+        <span className="battle-start-icon">
+          <Icon name="swords" size={27} />
+        </span>
+        <span className="battle-start-copy">
+          <small>準備はできましたか？</small>
+          <strong>対戦を始める</strong>
+        </span>
+        <span className="battle-start-arrow">
+          <Icon name="chevron" size={20} />
+        </span>
+      </button>
+    </div>
+  );
 }
 
 const leaders = [
@@ -590,10 +639,27 @@ const feed = [
   },
 ];
 
+const myNotes = [
+  {
+    name: "中村 葵",
+    school: "青葉高校",
+    time: "昨日",
+    subject: "数学",
+    title: "二次関数のグラフと解き方",
+    text: "テスト前に見直したいポイントを、例題と一緒にまとめました。",
+    image: photos[2],
+    likes: 42,
+    color: "mint",
+    initials: "葵",
+  },
+];
+
 function ExploreScreen() {
   const [query, setQuery] = useState("");
   const [liked, setLiked] = useState<number[]>([]);
-  const filtered = feed.filter((post) =>
+  const [noteTab, setNoteTab] = useState("みんなのノート");
+  const noteSource = noteTab === "みんなのノート" ? feed : myNotes;
+  const visibleNotes = noteSource.filter((post) =>
     `${post.subject} ${post.title}`.toLowerCase().includes(query.toLowerCase()),
   );
   return (
@@ -607,6 +673,17 @@ function ExploreScreen() {
           placeholder="科目や学習テーマを検索"
         />
       </div>
+      <div className="note-tabs" aria-label="ノートの表示切り替え">
+        {["みんなのノート", "自分のノート"].map((item) => (
+          <button
+            key={item}
+            className={noteTab === item ? "active" : ""}
+            onClick={() => setNoteTab(item)}
+          >
+            {item}
+          </button>
+        ))}
+      </div>
       <div className="topic-row">
         {["おすすめ", "物理", "歴史", "テスト対策"].map((topic, index) => (
           <button className={index === 0 ? "active" : ""} key={topic}>
@@ -615,7 +692,7 @@ function ExploreScreen() {
         ))}
       </div>
       <div className="feed-list">
-        {filtered.map((post, index) => (
+        {visibleNotes.map((post, index) => (
           <article className="feed-card" key={post.title}>
             <div className="feed-author">
               <Avatar initials={post.initials} color={post.color} />
@@ -657,7 +734,7 @@ function ExploreScreen() {
             </button>
           </article>
         ))}
-        {filtered.length === 0 && (
+        {visibleNotes.length === 0 && (
           <div className="empty-search">
             <Icon name="search" size={28} />
             <h3>ノートが見つかりません</h3>
@@ -786,9 +863,30 @@ function SettingRow({
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("home");
-  const hiddenNav = screen === "ranking" || screen === "explore";
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  const hiddenNav = screen === "explore";
   const navigate = (next: Screen) => setScreen(next);
   const goBack = () => setScreen("home");
+  const screens: Screen[] = ["home", "explore", "battle", "ranking", "settings"];
+  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest(".topic-row")) {
+      swipeStart.current = null;
+      return;
+    }
+    const touch = event.touches[0];
+    swipeStart.current = { x: touch.clientX, y: touch.clientY };
+  };
+  const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    if (!swipeStart.current) return;
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - swipeStart.current.x;
+    const deltaY = touch.clientY - swipeStart.current.y;
+    swipeStart.current = null;
+    if (Math.abs(deltaX) < 55 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
+    const currentIndex = screens.indexOf(screen);
+    const nextIndex = deltaX < 0 ? currentIndex + 1 : currentIndex - 1;
+    if (nextIndex >= 0 && nextIndex < screens.length) navigate(screens[nextIndex]);
+  };
   return (
     <main className="app-shell">
       <div className="phone-frame">
@@ -800,7 +898,11 @@ export default function App() {
             <b />
           </div>
         </div>
-        <div className={`app-content ${hiddenNav ? "no-tabs" : ""}`}>
+        <div
+          className={`app-content ${hiddenNav ? "no-tabs" : ""}`}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           {screen === "home" && <HomeScreen />}
           {screen === "battle" && <BattleScreen />}
           {screen === "ranking" && <RankingScreen />}
@@ -808,7 +910,7 @@ export default function App() {
           {screen === "settings" && <SettingsScreen />}
         </div>
         {!hiddenNav && <BottomNav screen={screen} onNavigate={navigate} />}
-        {hiddenNav && <FloatingNav onBack={goBack} onHome={() => navigate("home")} />}
+        {hiddenNav && <Taskbar onBack={goBack} onHome={() => navigate("home")} />}
       </div>
     </main>
   );
