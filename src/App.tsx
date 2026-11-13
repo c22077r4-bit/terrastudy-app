@@ -872,7 +872,6 @@ export default function App() {
   const hiddenNav = screen === "explore";
   const navigate = (next: Screen) => setScreen(next);
   const goBack = () => setScreen("home");
-  const screens: Screen[] = ["settings", "explore", "home", "battle", "ranking"];
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     if ((event.target as HTMLElement).closest(".topic-row")) {
       swipeStart.current = null;
@@ -888,9 +887,7 @@ export default function App() {
     const deltaY = touch.clientY - swipeStart.current.y;
     swipeStart.current = null;
     if (Math.abs(deltaX) < 55 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
-    const currentIndex = screens.indexOf(screen);
-    const nextIndex = deltaX < 0 ? currentIndex - 1 : currentIndex + 1;
-    if (nextIndex >= 0 && nextIndex < screens.length) navigate(screens[nextIndex]);
+    navigate(deltaX > 0 ? "explore" : "battle");
   };
   return (
     <main className="app-shell">
