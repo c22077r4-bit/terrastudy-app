@@ -889,7 +889,7 @@ export default function App() {
     swipeStart.current = null;
     if (Math.abs(deltaX) < 55 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
     const currentIndex = screens.indexOf(screen);
-    const nextIndex = deltaX < 0 ? currentIndex - 1 : currentIndex + 1;
+    const nextIndex = deltaX < 0 ? currentIndex + 1 : currentIndex - 1;
     if (nextIndex >= 0 && nextIndex < screens.length) navigate(screens[nextIndex]);
   };
   return (
