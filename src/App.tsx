@@ -252,6 +252,10 @@ function HomeScreen() {
     const timer = window.setInterval(() => setSeconds((value) => value + 1), 1000);
     return () => window.clearInterval(timer);
   }, [running]);
+  const goalSeconds = 180 * 60;
+  const progress = Math.min(100, (seconds / goalSeconds) * 100);
+  const earnedPoints = Math.floor(seconds / 60) * 5;
+  const remainingMinutes = Math.max(0, 180 - Math.floor(seconds / 60));
   const time = useMemo(() => {
     const h = Math.floor(seconds / 3600)
       .toString()
@@ -284,17 +288,18 @@ function HomeScreen() {
         <div className="soft-orb orb-two" />
         <div className="daily-label">
           <span>今日の集中度</span>
-          <b>75%</b>
+          <b>{Math.round(progress)}%</b>
         </div>
         <div
           className="timer-ring"
-          style={{ "--progress": `${Math.min(92, 35 + seconds / 55)}%` } as React.CSSProperties}
+          style={{ "--progress": `${progress}%` } as React.CSSProperties}
         >
           <div className="timer-inner">
             <span>{running ? "集中中" : "今日の学習時間"}</span>
             <strong>{time}</strong>
             <small>
-              <Icon name="bolt" size={13} /> 目標まであと15分
+              <Icon name="bolt" size={13} />
+              {remainingMinutes > 0 ? `目標まであと${remainingMinutes}分` : "目標達成！"}
             </small>
           </div>
         </div>
@@ -333,7 +338,7 @@ function HomeScreen() {
           </div>
           <span>学習ポイント</span>
           <strong>
-            1,240 <em>点</em>
+            {(1240 + earnedPoints).toLocaleString("ja-JP")} <em>点</em>
           </strong>
           <small>
             今週の上位 <b>8%</b>
@@ -387,7 +392,7 @@ function HomeScreen() {
                 defaultValue="二次関数と練習問題"
               />
               <button className="primary-button" onClick={() => setModal("post")}>
-                記録を完了 <span>+320点</span>
+                記録を完了 <span>+{earnedPoints}点</span>
               </button>
             </div>
           ) : (
@@ -867,7 +872,7 @@ export default function App() {
   const hiddenNav = screen === "explore";
   const navigate = (next: Screen) => setScreen(next);
   const goBack = () => setScreen("home");
-  const screens: Screen[] = ["home", "explore", "battle", "ranking", "settings"];
+  const screens: Screen[] = ["settings", "explore", "home", "battle", "ranking"];
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     if ((event.target as HTMLElement).closest(".topic-row")) {
       swipeStart.current = null;
@@ -884,7 +889,7 @@ export default function App() {
     swipeStart.current = null;
     if (Math.abs(deltaX) < 55 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
     const currentIndex = screens.indexOf(screen);
-    const nextIndex = deltaX < 0 ? currentIndex + 1 : currentIndex - 1;
+    const nextIndex = deltaX < 0 ? currentIndex - 1 : currentIndex + 1;
     if (nextIndex >= 0 && nextIndex < screens.length) navigate(screens[nextIndex]);
   };
   return (
