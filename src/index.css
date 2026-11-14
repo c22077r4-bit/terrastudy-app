@@ -277,6 +277,59 @@
 .study-button.stop {
   color: #e25054;
 }
+.manual-entry-button {
+  position: relative;
+  z-index: 3;
+  margin-top: 10px;
+  padding: 9px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.14);
+  color: white;
+  font: 700 11px "Manrope";
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(6px);
+  transition: background 0.2s;
+}
+.manual-entry-button:active {
+  background: rgba(255, 255, 255, 0.26);
+}
+.manual-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.manual-inputs > div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  background: #f8fafb;
+  border-radius: 12px;
+  padding: 10px 13px;
+}
+.manual-inputs input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: none;
+  font: 800 20px "Manrope";
+  color: var(--ink);
+  text-align: center;
+}
+.manual-inputs span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.primary-button:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+  cursor: default;
+}
 .play-triangle {
   width: 0;
   height: 0;
@@ -505,6 +558,25 @@
   color: #b4ded2;
   font-size: 11px;
   font-weight: 700;
+}
+.battle-countdown {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #d9f6ec;
+  font: 700 8px "Manrope";
+  letter-spacing: 0.3px;
+}
+.battle-countdown b {
+  color: #ffe08a;
+  font-weight: 800;
 }
 .battle-points-icon {
   width: 38px;
@@ -1277,6 +1349,9 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 2px;
 }
+.segmented.two {
+  grid-template-columns: 1fr 1fr;
+}
 .segmented button {
   border: 0;
   background: none;
@@ -1492,6 +1567,9 @@
   align-items: center;
   gap: 2px;
 }
+.points span.study-time {
+  color: var(--muted);
+}
 .avatar {
   flex: 0 0 auto;
   width: 42px;
@@ -1504,6 +1582,34 @@
   background-size: cover;
   background-position: center;
   font: 800 10px "Manrope";
+  position: relative;
+}
+.avatar-crown {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #9e710c;
+  background: linear-gradient(145deg, #ffe08a, #f2b73a);
+  border: 1.5px solid white;
+  box-shadow: 0 2px 5px rgba(158, 113, 12, 0.35);
+}
+.crown-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  margin-left: 4px;
+  border-radius: 50%;
+  color: #9e710c;
+  background: linear-gradient(145deg, #ffe08a, #f2b73a);
+  font-style: normal;
+  vertical-align: middle;
 }
 .avatar.purple {
   background: linear-gradient(145deg, #a698ff, #6f5ce4);
@@ -1884,6 +1990,308 @@
   text-align: center;
   font-size: 8px;
   margin: 18px 0;
+}
+.plan-title {
+  margin-top: 0;
+}
+.plan-grid {
+  display: grid;
+  gap: 9px;
+}
+.plan-card {
+  position: relative;
+  border: 1.5px solid var(--line);
+  background: white;
+  border-radius: 18px;
+  padding: 14px 15px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.plan-card.active {
+  border-color: var(--emerald);
+  background: linear-gradient(145deg, #ffffff, #ecfbf5);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.14);
+}
+.plan-card b {
+  font: 800 12px "Manrope";
+}
+.plan-card.active b::after {
+  content: "利用中";
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--mint);
+  color: var(--emerald-dark);
+  font: 800 7px "Manrope";
+  vertical-align: 2px;
+}
+.plan-card strong {
+  grid-row: 1 / 3;
+  font: 800 17px "Manrope";
+  text-align: right;
+}
+.plan-card strong small {
+  font-size: 8px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.plan-card ul {
+  grid-column: 1 / 2;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.plan-card li {
+  position: relative;
+  padding-left: 12px;
+  color: var(--muted);
+  font-size: 9px;
+}
+.plan-card li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mint);
+}
+.plan-card button {
+  grid-column: 1 / 3;
+  height: 34px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--emerald);
+  color: white;
+  font: 800 10px "Manrope";
+}
+.plan-card button.current {
+  background: #eaf2ef;
+  color: #8b989d;
+}
+.plan-badge {
+  position: absolute;
+  top: -8px;
+  right: 12px;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: linear-gradient(145deg, #ffe08a, #f2b73a);
+  color: #7a5606;
+  font: 800 7px "Manrope";
+}
+.customize-panel {
+  margin-top: 9px;
+  padding: 15px;
+  border: 1px dashed #b7e3cf;
+  border-radius: 16px;
+  background: #f4fbf8;
+}
+.customize-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.customize-preview > div {
+  display: flex;
+  flex-direction: column;
+}
+.customize-preview b {
+  font-size: 10px;
+}
+.customize-preview span {
+  color: var(--muted);
+  font-size: 8px;
+}
+.customize-panel label {
+  display: block;
+  margin: 11px 0 7px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.photo-picks {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.photo-picks button {
+  aspect-ratio: 1;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #eaf2ef;
+  transition: border-color 0.2s;
+}
+.photo-picks button.selected {
+  border-color: var(--emerald);
+}
+.photo-picks img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo-picks .photo-clear {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 700;
+}
+.deco-picks {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.deco-picks button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  background: white;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.deco-picks button.selected {
+  border-color: var(--emerald);
+  background: #effbf7;
+}
+.deco-picks .avatar {
+  width: 30px;
+  height: 30px;
+  font-size: 8px;
+}
+.deco-note {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 11px 0 0;
+  color: #a08428;
+  font-size: 8px;
+}
+.personal-summary {
+  margin-top: 13px;
+  padding: 15px;
+  border-radius: 18px;
+  background: white;
+  border: 1px solid #e9efed;
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+.personal-summary i {
+  width: 1px;
+  height: 34px;
+  background: var(--line);
+}
+.personal-summary div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.personal-summary span {
+  color: var(--muted);
+  font-size: 9px;
+}
+.personal-summary strong {
+  font: 800 17px "Manrope";
+}
+.chart-card {
+  margin-top: 11px;
+  padding: 15px;
+  background: white;
+  border: 1px solid #e9efed;
+  border-radius: 18px;
+}
+.chart-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 13px;
+}
+.chart-title b {
+  font: 800 12px "Manrope";
+}
+.chart-title span {
+  color: var(--muted);
+  font-size: 8px;
+}
+.bar-chart {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  height: 150px;
+}
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-height: 0;
+}
+.bar-col small {
+  font: 700 7px "Manrope";
+  color: var(--muted);
+  white-space: nowrap;
+}
+.bar-track {
+  flex: 1;
+  width: 100%;
+  max-width: 18px;
+  border-radius: 6px;
+  background: #eef4f2;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.bar-track i {
+  display: block;
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, #2fd4a0, #0a9c72);
+}
+.bar-col > span {
+  font: 700 8px "Manrope";
+  color: #82908f;
+}
+.radar-chart {
+  width: 100%;
+  max-width: 230px;
+  margin: 0 auto;
+  display: block;
+}
+.radar-ring {
+  fill: none;
+  stroke: #e2ebe8;
+  stroke-width: 1;
+}
+.radar-axis {
+  stroke: #e2ebe8;
+  stroke-width: 1;
+}
+.radar-fill {
+  fill: rgba(16, 185, 129, 0.22);
+  stroke: var(--emerald);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.radar-label {
+  font: 700 9px "Manrope";
+  fill: #62747a;
 }
 
 @media (max-width: 392px) {
