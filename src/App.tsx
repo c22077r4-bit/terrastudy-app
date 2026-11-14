@@ -22,7 +22,8 @@ type IconName =
   | "camera"
   | "check"
   | "book"
-  | "sparkles";
+  | "sparkles"
+  | "crown";
 
 const photos = [
   "https://images.unsplash.com/photo-1517971071642-34a2d3ecc9cd?auto=format&fit=crop&w=900&q=85",
@@ -137,6 +138,7 @@ function Icon({
         <path d="m12 3 1.2 3.8L17 8l-3.8 1.2L12 13l-1.2-3.8L7 8l3.8-1.2L12 3Zm6 10 .8 2.2L21 16l-2.2.8L18 19l-.8-2.2L15 16l2.2-.8L18 13ZM5 14l.9 2.6L8.5 18l-2.6.9L5 21.5l-.9-2.6L1.5 18l2.6-1.4L5 14Z" />
       </>
     ),
+    crown: <path d="m4 18-1-11 5 3.5L12 4l4 6.5L21 7l-1 11H4Zm0 3h16" />,
   };
   return (
     <svg
@@ -159,10 +161,12 @@ function Avatar({
   initials,
   color = "mint",
   image,
+  decoration = "none",
 }: {
   initials: string;
   color?: string;
   image?: string;
+  decoration?: "none" | "crown";
 }) {
   return (
     <div
@@ -170,6 +174,11 @@ function Avatar({
       style={image ? { backgroundImage: `url(${image})` } : undefined}
     >
       {!image && initials}
+      {decoration === "crown" && (
+        <span className="avatar-crown">
+          <Icon name="crown" size={9} strokeWidth={2.4} />
+        </span>
+      )}
     </div>
   );
 }
@@ -245,7 +254,10 @@ function Taskbar({ onBack, onHome }: { onBack: () => void; onHome: () => void })
 function HomeScreen() {
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(false);
-  const [modal, setModal] = useState<"log" | "post" | null>(null);
+  const [modal, setModal] = useState<"log" | "post" | "manual" | null>(null);
+  const [entryPoints, setEntryPoints] = useState(0);
+  const [manualHours, setManualHours] = useState(0);
+  const [manualMinutes, setManualMinutes] = useState(30);
   const [subject, setSubject] = useState("数学");
   useEffect(() => {
     if (!running) return;
@@ -269,6 +281,7 @@ function HomeScreen() {
 
   const stop = () => {
     setRunning(false);
+    setEntryPoints(Math.floor(seconds / 60) * 5);
     setModal("log");
   };
   return (
@@ -309,6 +322,10 @@ function HomeScreen() {
         >
           <span className={running ? "stop-square" : "play-triangle"} />
           {running ? "学習を終了" : "学習を始める"}
+        </button>
+        <button className="manual-entry-button" onClick={() => setModal("manual")}>
+          <Icon name="clock" size={14} />
+          手動で学習時間を入力
         </button>
         <p className="encourage">
           {running ? "集中できています。その調子！" : "小さな積み重ねが、大きな成果に。"}
@@ -364,7 +381,59 @@ function HomeScreen() {
           className="modal-backdrop"
           onMouseDown={(e) => e.target === e.currentTarget && setModal(null)}
         >
-          {modal === "log" ? (
+          {modal === "manual" ? (
+            <div className="modal-card">
+              <div className="modal-handle" />
+              <div className="modal-icon">
+                <Icon name="clock" />
+              </div>
+              <span className="eyebrow">手動記録</span>
+              <h2>学習時間を入力</h2>
+              <p>タイマーを使わずに行った学習の時間を入力してください。</p>
+              <div className="manual-inputs">
+                <div>
+                  <input
+                    type="number"
+                    min={0}
+                    max={12}
+                    value={manualHours}
+                    aria-label="時間"
+                    onChange={(e) =>
+                      setManualHours(Math.max(0, Math.min(12, Number(e.target.value) || 0)))
+                    }
+                  />
+                  <span>時間</span>
+                </div>
+                <div>
+                  <input
+                    type="number"
+                    min={0}
+                    max={59}
+                    value={manualMinutes}
+                    aria-label="分"
+                    onChange={(e) =>
+                      setManualMinutes(Math.max(0, Math.min(59, Number(e.target.value) || 0)))
+                    }
+                  />
+                  <span>分</span>
+                </div>
+              </div>
+              <button
+                className="primary-button"
+                disabled={manualHours * 60 + manualMinutes === 0}
+                onClick={() => {
+                  setEntryPoints((manualHours * 60 + manualMinutes) * 5);
+                  setModal("log");
+                }}
+              >
+                学習内容を選ぶ
+                <span>+{((manualHours * 60 + manualMinutes) * 5).toLocaleString("ja-JP")}点</span>
+              </button>
+              <button className="text-button" onClick={() => setModal(null)}>
+                キャンセル
+              </button>
+            </div>
+          ) : modal === "log" ? (
             <div className="modal-card">
               <div className="modal-handle" />
               <div className="modal-icon">
@@ -392,7 +461,7 @@ function HomeScreen() {
                 defaultValue="二次関数と練習問題"
               />
               <button className="primary-button" onClick={() => setModal("post")}>
-                記録を完了 <span>+{earnedPoints}点</span>
+                記録を完了 <span>+{entryPoints.toLocaleString("ja-JP")}点</span>
               </button>
             </div>
           ) : (
@@ -424,6 +493,17 @@ function HomeScreen() {
 }
 
 function BattleScreen() {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const seasonEnd = new Date(now);
+  seasonEnd.setDate(seasonEnd.getDate() + ((7 - seasonEnd.getDay()) % 7));
+  seasonEnd.setHours(24, 0, 0, 0);
+  const remaining = Math.max(0, seasonEnd.getTime() - now);
+  const leftDays = Math.floor(remaining / 86400000);
+  const leftHours = Math.floor((remaining % 86400000) / 3600000);
   return (
     <div className="screen battle-screen" aria-label="陣地バトル">
       <TopBar
@@ -437,6 +517,10 @@ function BattleScreen() {
       />
       <section className="battle-points-card">
         <div className="battle-card-glow" />
+        <div className="battle-countdown">
+          <Icon name="clock" size={11} />
+          シーズン終了まで: <b>{leftDays}日 {leftHours}時間</b>
+        </div>
         <div className="battle-points-heading">
           <div className="battle-points-icon">
             <Icon name="trophy" size={22} />
@@ -479,47 +563,164 @@ const leaders = [
   {
     name: "田中 美緒",
     school: "青葉高校 · チームテラ",
-    points: "18,420",
-    multi: "1.8×",
+    minutes: 1450,
     initials: "美",
     color: "mint",
+    premium: true,
   },
   {
     name: "佐藤 蓮",
     school: "明星学園 · ノヴァ",
-    points: "17,980",
-    multi: "1.6×",
+    minutes: 1380,
     initials: "蓮",
     color: "purple",
+    premium: false,
   },
   {
     name: "木村 結菜",
     school: "青葉高校 · チームテラ",
-    points: "16,750",
-    multi: "1.5×",
+    minutes: 1290,
     initials: "結",
     color: "amber",
+    premium: true,
   },
   {
     name: "伊藤 悠人",
     school: "光陽高校 · オリオン",
-    points: "14,290",
-    multi: "1.3×",
+    minutes: 1100,
     initials: "悠",
     color: "blue",
+    premium: false,
   },
   {
     name: "森 咲希",
     school: "明星学園 · ノヴァ",
-    points: "13,840",
-    multi: "1.2×",
+    minutes: 985,
     initials: "咲",
     color: "pink",
+    premium: true,
   },
 ];
 
+const formatMinutes = (minutes: number) => {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return h > 0 ? `${h}時間${m > 0 ? `${m}分` : ""}` : `${m}分`;
+};
+
+const weekDays = ["月", "火", "水", "木", "金", "土", "日"];
+const weeklyMinutes = [95, 140, 60, 175, 120, 210, 150];
+const subjectBreakdown = [
+  { subject: "国語", minutes: 210 },
+  { subject: "数学", minutes: 390 },
+  { subject: "理科", minutes: 260 },
+  { subject: "英語", minutes: 330 },
+  { subject: "社会", minutes: 180 },
+  { subject: "その他", minutes: 90 },
+];
+
+function BarChart() {
+  const max = Math.max(...weeklyMinutes);
+  return (
+    <div className="chart-card">
+      <div className="chart-title">
+        <b>今週の学習時間</b>
+        <span>過去1週間（月〜日）</span>
+      </div>
+      <div className="bar-chart">
+        {weeklyMinutes.map((minutes, index) => (
+          <div className="bar-col" key={weekDays[index]}>
+            <small>{minutes >= 60 ? `${(minutes / 60).toFixed(1)}h` : `${minutes}m`}</small>
+            <div className="bar-track">
+              <i style={{ height: `${Math.round((minutes / max) * 100)}%` }} />
+            </div>
+            <span>{weekDays[index]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RadarChart() {
+  const size = 190;
+  const center = size / 2;
+  const radius = 66;
+  const axes = subjectBreakdown.map((item, index) => {
+    const angle = (Math.PI * 2 * index) / subjectBreakdown.length - Math.PI / 2;
+    return { ...item, angle };
+  });
+  const maxMinutes = Math.max(...subjectBreakdown.map((s) => s.minutes));
+  const polygon = axes
+    .map((axis) => {
+      const value = axis.minutes / maxMinutes;
+      const x = center + Math.cos(axis.angle) * radius * value;
+      const y = center + Math.sin(axis.angle) * radius * value;
+      return `${x},${y}`;
+    })
+    .join(" ");
+  const ring = (scale: number) =>
+    axes
+      .map((axis) => {
+        const x = center + Math.cos(axis.angle) * radius * scale;
+        const y = center + Math.sin(axis.angle) * radius * scale;
+        return `${x},${y}`;
+      })
+      .join(" ");
+  return (
+    <div className="chart-card">
+      <div className="chart-title">
+        <b>科目別の学習バランス</b>
+        <span>6科目の学習時間配分</span>
+      </div>
+      <svg className="radar-chart" viewBox={`0 0 ${size} ${size + 34}`}>
+        {[1, 0.66, 0.33].map((scale) => (
+          <polygon key={scale} className="radar-ring" points={ring(scale)} />
+        ))}
+        {axes.map((axis) => {
+          const x = center + Math.cos(axis.angle) * radius;
+          const y = center + Math.sin(axis.angle) * radius;
+          return <line key={axis.subject} className="radar-axis" x1={center} y1={center} x2={x} y2={y} />;
+        })}
+        <polygon className="radar-fill" points={polygon} />
+        {axes.map((axis) => {
+          const x = center + Math.cos(axis.angle) * (radius + 21);
+          const y = center + Math.sin(axis.angle) * (radius + 15);
+          return (
+            <text key={axis.subject} className="radar-label" x={x} y={y} textAnchor="middle">
+              {axis.subject}
+            </text>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+function PersonalRecordScreen() {
+  const totalMinutes = weeklyMinutes.reduce((sum, value) => sum + value, 0);
+  return (
+    <>
+      <div className="personal-summary">
+        <div>
+          <span>今週の合計</span>
+          <strong>{formatMinutes(totalMinutes)}</strong>
+        </div>
+        <i />
+        <div>
+          <span>1日平均</span>
+          <strong>{formatMinutes(Math.round(totalMinutes / 7))}</strong>
+        </div>
+      </div>
+      <BarChart />
+      <RadarChart />
+    </>
+  );
+}
+
 function RankingScreen() {
-  const [tab, setTab] = useState("地域別");
+  const [tab, setTab] = useState("チーム内ランキング");
+  const ranked = [...leaders].sort((a, b) => b.minutes - a.minutes);
   return (
     <div className="screen detail-screen ranking-screen">
       <TopBar
@@ -531,76 +732,86 @@ function RankingScreen() {
           </div>
         }
       />
-      <div className="segmented">
-        {["地域別", "シーズン", "フレンド"].map((item) => (
+      <div className="segmented two">
+        {["チーム内ランキング", "個人の学習記録"].map((item) => (
           <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>
             {item}
           </button>
         ))}
       </div>
-      <div className="league-card">
-        <div className="league-top">
-          <div>
-            <span>現在のリーグ</span>
-            <h2>エメラルドリーグ</h2>
-          </div>
-          <div className="league-icon">
-            <Icon name="trophy" />
-          </div>
-        </div>
-        <div className="league-progress">
-          <i />
-        </div>
-        <div className="league-foot">
-          <span>上位10名が昇格</span>
-          <b>残り4日</b>
-        </div>
-      </div>
-      <div className="podium">
-        {[1, 0, 2].map((index, order) => (
-          <div className={`podium-player place-${index + 1}`} key={leaders[index].name}>
-            {index === 0 && <div className="crown">1</div>}
-            <Avatar initials={leaders[index].initials} color={leaders[index].color} />
-            <b>{leaders[index].name.split(" ")[1]}</b>
-            <span>{leaders[index].points}</span>
-            <div className="podium-base">{index + 1}</div>
-          </div>
-        ))}
-      </div>
-      <div className="leader-list">
-        {leaders.slice(3).map((person, index) => (
-          <div className="leader-row" key={person.name}>
-            <b className="rank-num">{index + 4}</b>
-            <Avatar initials={person.initials} color={person.color} />
-            <div className="grow">
-              <strong>{person.name}</strong>
-              <span>{person.school}</span>
+      {tab === "個人の学習記録" ? (
+        <PersonalRecordScreen />
+      ) : (
+        <>
+          <div className="league-card">
+            <div className="league-top">
+              <div>
+                <span>現在のリーグ</span>
+                <h2>エメラルドリーグ</h2>
+              </div>
+              <div className="league-icon">
+                <Icon name="trophy" />
+              </div>
             </div>
-            <div className="points">
-              <b>{person.points}</b>
-              <span>
-                <Icon name="bolt" size={10} /> {person.multi} ボーナス
-              </span>
+            <div className="league-progress">
+              <i />
+            </div>
+            <div className="league-foot">
+              <span>上位10名が昇格</span>
+              <b>残り4日</b>
             </div>
           </div>
-        ))}
-        <div className="leader-row current">
-          <b className="rank-num">12</b>
-          <Avatar initials="葵" />
-          <div className="grow">
-            <strong>
-              中村 葵 <i>あなた</i>
-            </strong>
-            <span>青葉高校 · チームテラ</span>
+          <div className="podium">
+            {[1, 0, 2].map((index, order) => (
+              <div className={`podium-player place-${index + 1}`} key={ranked[index].name}>
+                {index === 0 && <div className="crown">1</div>}
+                <Avatar
+                  initials={ranked[index].initials}
+                  color={ranked[index].color}
+                  decoration={ranked[index].premium ? "crown" : "none"}
+                />
+                <b>{ranked[index].name.split(" ")[1]}</b>
+                <span>{formatMinutes(ranked[index].minutes)}</span>
+                <div className="podium-base">{index + 1}</div>
+              </div>
+            ))}
           </div>
-          <div className="points">
-            <b>11,240</b>
-            <span>
-              <Icon name="bolt" size={10} /> 1.2× ボーナス
-            </span>
+          <div className="leader-list">
+            {ranked.slice(3).map((person, index) => (
+              <div className="leader-row" key={person.name}>
+                <b className="rank-num">{index + 4}</b>
+                <Avatar
+                  initials={person.initials}
+                  color={person.color}
+                  decoration={person.premium ? "crown" : "none"}
+                />
+                <div className="grow">
+                  <strong>{person.name}</strong>
+                  <span>{person.school}</span>
+                </div>
+                <div className="points">
+                  <b>{formatMinutes(person.minutes)}</b>
+                  <span>学習時間</span>
+                </div>
+              </div>
+            ))}
+            <div className="leader-row current">
+              <b className="rank-num">12</b>
+              <Avatar initials="葵" />
+              <div className="grow">
+                <strong>
+                  中村 葵 <i>あなた</i>
+                </strong>
+                <span>青葉高校 · チームテラ</span>
+              </div>
+              <div className="points">
+                <b>8時間20分</b>
+                <span>学習時間</span>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }

@@ -277,6 +277,59 @@
 .study-button.stop {
   color: #e25054;
 }
+.manual-entry-button {
+  position: relative;
+  z-index: 3;
+  margin-top: 10px;
+  padding: 9px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.14);
+  color: white;
+  font: 700 11px "Manrope";
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(6px);
+  transition: background 0.2s;
+}
+.manual-entry-button:active {
+  background: rgba(255, 255, 255, 0.26);
+}
+.manual-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.manual-inputs > div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  background: #f8fafb;
+  border-radius: 12px;
+  padding: 10px 13px;
+}
+.manual-inputs input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: none;
+  font: 800 20px "Manrope";
+  color: var(--ink);
+  text-align: center;
+}
+.manual-inputs span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.primary-button:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+  cursor: default;
+}
 .play-triangle {
   width: 0;
   height: 0;
@@ -505,6 +558,25 @@
   color: #b4ded2;
   font-size: 11px;
   font-weight: 700;
+}
+.battle-countdown {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #d9f6ec;
+  font: 700 8px "Manrope";
+  letter-spacing: 0.3px;
+}
+.battle-countdown b {
+  color: #ffe08a;
+  font-weight: 800;
 }
 .battle-points-icon {
   width: 38px;
@@ -1277,6 +1349,9 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 2px;
 }
+.segmented.two {
+  grid-template-columns: 1fr 1fr;
+}
 .segmented button {
   border: 0;
   background: none;
@@ -1504,6 +1579,21 @@
   background-size: cover;
   background-position: center;
   font: 800 10px "Manrope";
+  position: relative;
+}
+.avatar-crown {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #9e710c;
+  background: linear-gradient(145deg, #ffe08a, #f2b73a);
+  border: 1.5px solid white;
+  box-shadow: 0 2px 5px rgba(158, 113, 12, 0.35);
 }
 .avatar.purple {
   background: linear-gradient(145deg, #a698ff, #6f5ce4);
@@ -1884,6 +1974,117 @@
   text-align: center;
   font-size: 8px;
   margin: 18px 0;
+}
+.personal-summary {
+  margin-top: 13px;
+  padding: 15px;
+  border-radius: 18px;
+  background: white;
+  border: 1px solid #e9efed;
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+.personal-summary i {
+  width: 1px;
+  height: 34px;
+  background: var(--line);
+}
+.personal-summary div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.personal-summary span {
+  color: var(--muted);
+  font-size: 9px;
+}
+.personal-summary strong {
+  font: 800 17px "Manrope";
+}
+.chart-card {
+  margin-top: 11px;
+  padding: 15px;
+  background: white;
+  border: 1px solid #e9efed;
+  border-radius: 18px;
+}
+.chart-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 13px;
+}
+.chart-title b {
+  font: 800 12px "Manrope";
+}
+.chart-title span {
+  color: var(--muted);
+  font-size: 8px;
+}
+.bar-chart {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  height: 150px;
+}
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-height: 0;
+}
+.bar-col small {
+  font: 700 7px "Manrope";
+  color: var(--muted);
+  white-space: nowrap;
+}
+.bar-track {
+  flex: 1;
+  width: 100%;
+  max-width: 18px;
+  border-radius: 6px;
+  background: #eef4f2;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.bar-track i {
+  display: block;
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, #2fd4a0, #0a9c72);
+}
+.bar-col > span {
+  font: 700 8px "Manrope";
+  color: #82908f;
+}
+.radar-chart {
+  width: 100%;
+  max-width: 230px;
+  margin: 0 auto;
+  display: block;
+}
+.radar-ring {
+  fill: none;
+  stroke: #e2ebe8;
+  stroke-width: 1;
+}
+.radar-axis {
+  stroke: #e2ebe8;
+  stroke-width: 1;
+}
+.radar-fill {
+  fill: rgba(16, 185, 129, 0.22);
+  stroke: var(--emerald);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.radar-label {
+  font: 700 9px "Manrope";
+  fill: #62747a;
 }
 
 @media (max-width: 392px) {
