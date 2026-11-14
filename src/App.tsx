@@ -975,7 +975,29 @@ function Toggle({ initial = false }: { initial?: boolean }) {
   );
 }
 
-function SettingsScreen() {
+type Profile = { image?: string; color: string; decoration: "none" | "crown" };
+
+function SettingsScreen({
+  profile,
+  setProfile,
+}: {
+  profile: Profile;
+  setProfile: (next: Profile) => void;
+}) {
+  const [plan, setPlan] = useState<"free" | "standard" | "premium">("standard");
+  const [customizeOpen, setCustomizeOpen] = useState(false);
+  const plans = [
+    { id: "free", name: "Free", price: "¥0", perks: ["基本機能", "広告表示"] },
+    { id: "standard", name: "Standard", price: "¥300", perks: ["広告なし", "ランキング装飾"] },
+    {
+      id: "premium",
+      name: "Premium",
+      price: "¥800",
+      perks: ["すべての機能", "王冠デコレーション", "優先サポート"],
+    },
+  ] as const;
+  const decorations: Profile["decoration"][] = ["none", "crown"];
+  const decorationLabel = { none: "なし", crown: "王冠（有料会員）" };
   return (
     <div className="screen settings-screen">
       <TopBar
@@ -983,8 +1005,40 @@ function SettingsScreen() {
         subtitle="あなたの学習環境"
         trailing={<button className="settings-button">完了</button>}
       />
+      <section className="plan-section">
+        <h3 className="group-title plan-title">サブスクリプションプラン</h3>
+        <div className="plan-grid">
+          {plans.map((tier) => (
+            <div key={tier.id} className={`plan-card ${plan === tier.id ? "active" : ""}`}>
+              {tier.id === "premium" && <span className="plan-badge">おすすめ</span>}
+              <b>{tier.name}</b>
+              <strong>
+                {tier.price}
+                <small> / 月</small>
+              </strong>
+              <ul>
+                {tier.perks.map((perk) => (
+                  <li key={perk}>{perk}</li>
+                ))}
+              </ul>
+              <button
+                className={plan === tier.id ? "current" : ""}
+                disabled={plan === tier.id}
+                onClick={() => setPlan(tier.id)}
+              >
+                {plan === tier.id ? "利用中" : "変更する"}
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
       <div className="profile-card">
-        <Avatar initials="葵" />
+        <Avatar
+          initials="葵"
+          image={profile.image}
+          color={profile.color}
+          decoration={profile.decoration}
+        />
         <div>
           <h2>中村 葵</h2>
           <p>青葉高校 · 2年生</p>
@@ -996,9 +1050,69 @@ function SettingsScreen() {
       </div>
       <h3 className="group-title">アカウント</h3>
       <div className="settings-group">
+        <SettingRow
+          icon="user"
+          color="green"
+          title="アイコン・アバター設定"
+          description="写真・装飾の変更"
+          onClick={() => setCustomizeOpen(!customizeOpen)}
+        />
         <SettingRow icon="user-cog" color="green" title="プロフィール設定" value="編集" />
         <SettingRow icon="shield" color="purple" title="プライバシーと安全" />
       </div>
+      {customizeOpen && (
+        <div className="customize-panel">
+          <div className="customize-preview">
+            <Avatar
+              initials="葵"
+              image={profile.image}
+              color={profile.color}
+              decoration={profile.decoration}
+            />
+            <div>
+              <b>プレビュー</b>
+              <span>{profile.decoration === "crown" ? "王冠デコレーションを表示中" : "装飾なし"}</span>
+            </div>
+          </div>
+          <label>プロフィール写真</label>
+          <div className="photo-picks">
+            {photos.map((photo) => (
+              <button
+                key={photo}
+                className={profile.image === photo ? "selected" : ""}
+                onClick={() => setProfile({ ...profile, image: photo })}
+              >
+                <img src={photo} alt="プロフィール写真の候補" />
+              </button>
+            ))}
+            {profile.image && (
+              <button
+                className="photo-clear"
+                onClick={() => setProfile({ ...profile, image: undefined })}
+              >
+                <Icon name="user" size={16} />
+                <span>解除</span>
+              </button>
+            )}
+          </div>
+          <label>アバターの装飾</label>
+          <div className="deco-picks">
+            {decorations.map((deco) => (
+              <button
+                key={deco}
+                className={profile.decoration === deco ? "selected" : ""}
+                onClick={() => setProfile({ ...profile, decoration: deco })}
+              >
+                <Avatar initials="葵" decoration={deco} />
+                <span>{decorationLabel[deco]}</span>
+              </button>
+            ))}
+          </div>
+          <p className="deco-note">
+            <Icon name="crown" size={11} /> 王冠デコレーションは有料プラン（Standard / Premium）の特典です。
+          </p>
+        </div>
+      )}
       <h3 className="group-title">通知</h3>
       <div className="settings-group">
         <SettingRow
@@ -1050,6 +1164,7 @@ function SettingRow({
   description,
   value,
   control,
+  onClick,
 }: {
   icon: IconName;
   color: string;
@@ -1057,9 +1172,14 @@ function SettingRow({
   description?: string;
   value?: string;
   control?: ReactNode;
+  onClick?: () => void;
 }) {
   return (
-    <div className="setting-row">
+    <div
+      className="setting-row"
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+    >
       <div className={`setting-icon ${color}`}>
         <Icon name={icon} size={18} />
       </div>
@@ -1079,6 +1199,7 @@ function SettingRow({
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("home");
+  const [profile, setProfile] = useState<Profile>({ color: "mint", decoration: "crown" });
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
   const hiddenNav = screen === "explore";
   const navigate = (next: Screen) => setScreen(next);
@@ -1123,7 +1244,7 @@ export default function App() {
           {screen === "battle" && <BattleScreen />}
           {screen === "ranking" && <RankingScreen />}
           {screen === "explore" && <ExploreScreen />}
-          {screen === "settings" && <SettingsScreen />}
+          {screen === "settings" && <SettingsScreen profile={profile} setProfile={setProfile} />}
         </div>
         {!hiddenNav && <BottomNav screen={screen} onNavigate={navigate} />}
         {hiddenNav && <Taskbar onBack={goBack} onHome={() => navigate("home")} />}
